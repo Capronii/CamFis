@@ -3,7 +3,7 @@
 #Carareto
 #11/08/2020
 #Aplicação
-####################################################
+#####################################################
 
 
 #esta é a camada superior, de aplicação do seu software de comunicação serial UART.
@@ -14,7 +14,7 @@ from numpy.testing._private.utils import print_assert_equal
 from enlace import *
 import time
 import numpy as np
-import os 
+
 
 # voce deverá descomentar e configurar a porta com através da qual ira fazer comunicaçao
 #   para saber a sua porta, execute no terminal :
@@ -64,7 +64,7 @@ def main():
         tempo=time.time()
         # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
         # Tente entender como esse método funciona e o que ele retorna
-        txSize = com1.tx.getStatus()
+        #txSize = com1.tx.getStatus()
         #Agora vamos iniciar a recepção dos dados. Se algo chegou ao RX, deve estar automaticamente guardado
         #Observe o que faz a rotina dentro do thread RX
         #print um aviso de que a recepção vai começar.
