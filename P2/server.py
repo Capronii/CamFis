@@ -14,6 +14,7 @@ from numpy.testing._private.utils import print_assert_equal
 from enlace import *
 import time
 import numpy as np
+import os
 
 
 # voce deverá descomentar e configurar a porta com através da qual ira fazer comunicaçao
@@ -24,7 +25,7 @@ import numpy as np
 #use uma das 3 opcoes para atribuir à variável a porta usada
 #serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
 #serialName = "/dev/tty.usbmodem1411" # Mac    (variacao de)
-serialName = "COM3"                  # Windows(variacao de)
+serialName = "COM4"                  # Windows(variacao de)
 
 
 def main():
@@ -33,42 +34,46 @@ def main():
         #para declarar esse objeto é o nome da porta.
 
         print("Estabelencendo enlace:")
-        com1 = enlace('COM3')
+        com2 = enlace('COM4')
         print("Done")
 
-        com1.enable()
+        com2.enable()
         #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
         print("Estabelecida")
 
+        os.system('py client.py')
 
-
-        # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
-        # Tente entender como esse método funciona e o que ele retorna
-        #txSize = com1.tx.getStatus()
-        #Agora vamos iniciar a recepção dos dados. Se algo chegou ao RX, deve estar automaticamente guardado
-        #Observe o que faz a rotina dentro do thread RX
-        #print um aviso de que a recepção vai começar.
         print("Recepção começando")
-        #Será que todos os bytes enviados estão realmente guardadas? Será que conseguimos verificar?
-        #Veja o que faz a funcao do enlaceRX  getBufferLen
-        #acesso aos bytes recebidos
-         
-        rxBuffer, nRx = com1.getData(len(txBuffer))
+
+        #PEGANDO O TIMING
+        tempo=time.time()
+
+        msg_len_b, nRx = com2.getData(4)
+        print("Recebeu header")
+
+        msg_len = int.from_bytes(msg_len_b, byteorder="big")
+
+        rxBuffer, nRx = com2.getData(msg_len)
+
         print("recebeu {}" .format(rxBuffer))
-            
-        with open(saveImage,'wb') as file2:
-            file2.write(rxBuffer)
+
+        ftempo=time.time()
+        print("Tempo da tranferencia: {}".format(ftempo-tempo))
+
+        response = nRx.to_bytes(4, 'big')
+        com2.sendData(response)
+        print("resposta enviada")
 
         # Encerra comunicação
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")
-        com1.disable()
+        com2.disable()
         
     except Exception as erro:
         print("ops! :-\\")
         print(erro)
-        com1.disable()
+        com2.disable()
         
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda

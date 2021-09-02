@@ -46,8 +46,6 @@ def main():
         lista_bytes = np.array(comandos_a_serem_enviados)
         
 
-        #declaramos um objeto do tipo enlace com o nome "com". Essa é a camada inferior à aplicação. Observe que um parametro
-        #para declarar esse objeto é o nome da porta.
 
         print("Estabelencendo enlace:")
         com1 = enlace('COM3')
@@ -64,31 +62,35 @@ def main():
         print("Estabelecida")
 
         txBuffer = lista_bytes.tobytes()
-        print(len(txBuffer))
-        #aqui você deverá gerar os dados a serem transmitidos. 
-        #seus dados a serem transmitidos são uma lista de bytes a serem transmitidos. Gere esta lista com o 
-        #nome de txBuffer. Esla sempre irá armazenar os dados a serem enviados.
+        messsage_len = len(txBuffer)
 
-        #txBuffer = imagem em bytes!
+        header_size = 4
+        txBuffer_header = messsage_len.to_bytes(header_size, byteorder='big')
+        print(f"tamanho da lista a ser enviada {messsage_len}")
 
-        #faça aqui uma conferência do tamanho do seu txBuffer, ou seja, quantos bytes serão enviados.
+        com1.sendData(txBuffer_header)
+        print("Header enviado")
 
-            
-        #finalmente vamos transmitir os tados. Para isso usamos a funçao sendData que é um método da camada enlace.
-        #faça um print para avisar que a transmissão vai começar.
-        #tente entender como o método send funciona!
-        #Cuidado! Apenas trasmitimos arrays de bytes! Nao listas!
+        # rxBufferResponse,nRxResponse = com1.getData(header_size)
+
+        # if rxBufferResponse != txBuffer_header:    
+            # print("Problema na conferencia")
+
+        # print("Conferencia realizada")
         com1.sendData(np.asarray(txBuffer))
-        
-        # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
-        # Tente entender como esse método funciona e o que ele retorna
-        #txSize = com1.tx.getStatus()
-        #Agora vamos iniciar a recepção dos dados. Se algo chegou ao RX, deve estar automaticamente guardado
-        #Observe o que faz a rotina dentro do thread RX
-        #print um aviso de que a recepção vai começar.
-        
-
+        print("Mensagem enviada")
+            
         ftempo=time.time()
+
+        rxBufferResponse, nRxAns = com1.getData(header_size)
+
+        ans = int.from_bytes(rxBufferResponse, 'big')
+
+        if ans == messsage_len:
+            print("transferencia realizada com sucesso")
+
+        else:
+            print("problema na transferencia")        
 
         print("Tempo da tranferencia: {}".format(ftempo-tempo))
 
