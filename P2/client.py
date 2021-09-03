@@ -30,6 +30,7 @@ serialName = "COM3"                  # Windows(variacao de)
 
 def main():
     try:
+        
         #Lista de comandos possiveis
         comandos = [b'00FF', b'00', b'0F', b'F0', b'FF00', b'FF']
 
@@ -43,28 +44,24 @@ def main():
         for comando in range(n_comandos):
             comandos_a_serem_enviados.append(comandos[random.randint(0,5)])
 
-        lista_bytes = np.array(comandos_a_serem_enviados)
+        #lista_bytes = np.array(comandos_a_serem_enviados)
+        lista_final=b''.join(comandos_a_serem_enviados)
         
-
 
         print("Estabelencendo enlace:")
         com1 = enlace('COM3')
         print("Done")   
-        
+        print("Ativando comunicação")
+        com1.enable()
+        print("Estabelecida")
+
         #PEGANDO O TIMING
         tempo=time.time()
 
-        # Ativa comunicacao. Inicia os threads e a comunicação seiral 
-        print("Ativando comunicação")
-        com1.enable()
-
-        #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
-        print("Estabelecida")
-
-        txBuffer = lista_bytes.tobytes()
+        '''txBuffer = lista_bytes.tobytes()
         messsage_len = len(txBuffer)
 
-        header_size = 4
+        header_size = 2
         txBuffer_header = messsage_len.to_bytes(header_size, byteorder='big')
         print(f"tamanho da lista a ser enviada {messsage_len}")
 
@@ -77,10 +74,10 @@ def main():
             # print("Problema na conferencia")
 
         # print("Conferencia realizada")
-        com1.sendData(np.asarray(txBuffer))
+        #com1.sendData(np.asarray(txBuffer))
         print("Mensagem enviada")
             
-        ftempo=time.time()
+        
 
         rxBufferResponse, nRxAns = com1.getData(header_size)
 
@@ -91,6 +88,32 @@ def main():
 
         else:
             print("problema na transferencia")        
+'''
+
+        com1.sendData(b'\xaa\xaa')
+        print("testando ligação")
+        rxBuffer,nRx=com1.getData(2)
+        print("Recebido")
+        com1.rx.clearBuffer()
+
+        txBuffer=lista_final
+        txbufferlen=len(txBuffer)
+        com1.sendData(np.array(txBuffer))
+        print("Enviado informação")
+        print(txBuffer)
+
+
+        numero_comandos_enviados=len(comandos_a_serem_enviados).to_bytes(2,byteorder="big")
+        numero_comandos_recebidos, nRx= com1.getData(2)
+
+        if numero_comandos_enviados==numero_comandos_recebidos:
+            print("igual")
+        else:
+            print("diferente")
+
+        ftempo=time.time()
+        tempo_total=ftempo-tempo
+        velocidade=tempo_total/txbufferlen
 
         print("Tempo da tranferencia: {}".format(ftempo-tempo))
 
