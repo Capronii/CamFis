@@ -31,7 +31,6 @@ serialName = "COM3"                  # Windows(variacao de)
 def main():
     try:
         #Lista de comandos possiveis
-        # comandos = ['00FF', '00', '0F', 'F0', 'FF00', 'FF']
         comandos = [b'00FF', b'00', b'0F', b'F0', b'FF00', b'FF']
 
         #Numeros de comandos a serem enviados
@@ -42,16 +41,16 @@ def main():
 
         #Preenche lista
         for comando in range(n_comandos):
-            comandos_a_serem_enviados.append(comandos[random.randint(0,5)])
+            comando_add = comandos[random.randint(0,5)]
+            if len(comando_add) == 4:
+                comandos_a_serem_enviados.append(b'b')
+
+            comandos_a_serem_enviados.append(comando_add)
 
         print(comandos_a_serem_enviados)
-        n_comandos = len(comandos_a_serem_enviados).to_bytes(2, 'big')
-        # comandos_a_serem_enviados = ['F0', '0F', 'FF', '00', 'FF00', '00FF', '00', 'FF', '00', '00FF', '0F', '00FF', '00', 'F0', '00FF', '00FF']
+        n_comandos_b = n_comandos.to_bytes(2, 'big')
 
-        # comandos_a_serem_enviados = " ".join(comandos_a_serem_enviados)
-        lista_final=b''.join(comandos_a_serem_enviados)
-        # txBuffer = bytearray.fromhex(comandos_a_serem_enviados)
-        # txBuffer =  b'\xff\x00\xff\xf0'
+        lista_final = b''.join(comandos_a_serem_enviados)
 
         print("Estabelencendo enlace:")
         com1 = enlace('COM3')
@@ -81,37 +80,26 @@ def main():
 
         print(f'numero de comandos a serem enviados: {n_comandos}')
 
-        com1.sendData(txBuffer_header + n_comandos + txBuffer)
+        print(f'txBuffer: {txBuffer}')
 
-        # print(np.asarray(txBuffer_header))
-        # com1.sendData(np.asarray(txBuffer_header))
-        # print("Header enviado")
+        com1.sendData(txBuffer_header  + txBuffer)
 
-        # rxBufferResponse,nRxResponse = com1.getData(header_size)
 
-        # if rxBufferResponse != txBuffer_header:    
-            # print("Problema na conferencia")
-
-        # print("Conferencia realizada")
-
-        print(txBuffer)
-        # com1.sendData(np.asarray(txBuffer))
-        # com1.sendData(txBuffer)
         print("Mensagem enviada")
             
         ftempo=time.time()
-
-        # rxBufferResponse, nRxAns = com1.getData(header_size)
-
-        # ans = int.from_bytes(rxBufferResponse, 'big')
-
-        # if ans == messsage_len:
-        #     print("transferencia realizada com sucesso")
-
-        # else:
-        #     print("problema na transferencia")        
+     
 
         print("Tempo de envio: {}".format(ftempo-tempo))
+
+        n_comandos_recebidos_b = com1.getData(2)
+        n_comandos_recebidos = int.from_bytes(n_comandos_recebidos_b[0], byteorder="big")
+
+        if n_comandos_recebidos == n_comandos:
+            print("Sucesso! Servidor recebeu o numero certo de comandos")
+
+        else:
+            print("Erro! Servidor nao recebeu o numero certo de comandos")
 
         # Encerra comunicação
         print("-------------------------")

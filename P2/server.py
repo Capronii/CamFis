@@ -27,6 +27,21 @@ import os
 #serialName = "/dev/tty.usbmodem1411" # Mac    (variacao de)
 serialName = "COM4"                  # Windows(variacao de)
 
+def separa_lista_comandos(comandos_b):
+    lista_separada = []
+
+    i = 0
+    while i < len(comandos_b):
+        if comandos_b[i:i+1] == b'b':
+            lista_separada.append(comandos_b[i+1:i+5])
+            i += 5
+        
+        else:
+            lista_separada.append(comandos_b[i:i+2])
+            i += 2
+
+    return lista_separada
+
 
 def main():
     try:
@@ -41,25 +56,27 @@ def main():
         #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
         print("Estabelecida")
 
-        os.system('py client.py')
+        # os.system('py client.py')
 
         print("Recepção começando")
 
         #PEGANDO O TIMING
-        tempo=time.time()
+        
 
         #Recebe header
         msg_len_b, nRx = com2.getData(4)
         print("Recebeu header")
         
+        tempo=time.time()
+
         #converte header e obtem tamanho da transmissao
         msg_len = int.from_bytes(msg_len_b, byteorder="big")
         print(f"tamanho da transmissao: {msg_len}")
 
         #recebe numero de comandos e converte para decimal
-        n_comandos_b, nRx = com2.getData(2)
-        n_comandos = int.from_bytes(n_comandos_b, byteorder="big")
-        print(f"Numero de comandos a serem recebidos: {n_comandos}")
+        # n_comandos_b, nRx = com2.getData(2)
+        # n_comandos = int.from_bytes(n_comandos_b, byteorder="big")
+        # print(f"Numero de comandos a serem recebidos: {n_comandos}")
 
 
         #recebe mensagem 
@@ -67,9 +84,16 @@ def main():
 
         print("recebeu {}" .format(rxBuffer))
 
+        lista_separada = separa_lista_comandos(rxBuffer)
+        n_comandos = len(lista_separada)
+
+        print(f"lista de comandos separados: {lista_separada}")
+        print(f"comandos recebidos: {n_comandos}")
+
         ftempo=time.time()
         print("Tempo de recebimento: {}".format(ftempo-tempo))
 
+        com2.sendData(n_comandos.to_bytes(2, 'big'))
 
         # Encerra comunicação
         print("-------------------------")
