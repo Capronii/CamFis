@@ -48,21 +48,28 @@ def main():
         #PEGANDO O TIMING
         tempo=time.time()
 
+        #Recebe header
         msg_len_b, nRx = com2.getData(4)
         print("Recebeu header")
-
+        
+        #converte header e obtem tamanho da transmissao
         msg_len = int.from_bytes(msg_len_b, byteorder="big")
+        print(f"tamanho da transmissao: {msg_len}")
 
+        #recebe numero de comandos e converte para decimal
+        n_comandos_b, nRx = com2.getData(2)
+        n_comandos = int.from_bytes(n_comandos_b, byteorder="big")
+        print(f"Numero de comandos a serem recebidos: {n_comandos}")
+
+
+        #recebe mensagem 
         rxBuffer, nRx = com2.getData(msg_len)
 
         print("recebeu {}" .format(rxBuffer))
 
         ftempo=time.time()
-        print("Tempo da tranferencia: {}".format(ftempo-tempo))
+        print("Tempo de recebimento: {}".format(ftempo-tempo))
 
-        response = nRx.to_bytes(4, 'big')
-        com2.sendData(response)
-        print("resposta enviada")
 
         # Encerra comunicação
         print("-------------------------")

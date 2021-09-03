@@ -30,8 +30,8 @@ serialName = "COM3"                  # Windows(variacao de)
 
 def main():
     try:
-        
         #Lista de comandos possiveis
+        # comandos = ['00FF', '00', '0F', 'F0', 'FF00', 'FF']
         comandos = [b'00FF', b'00', b'0F', b'F0', b'FF00', b'FF']
 
         #Numeros de comandos a serem enviados
@@ -44,29 +44,48 @@ def main():
         for comando in range(n_comandos):
             comandos_a_serem_enviados.append(comandos[random.randint(0,5)])
 
-        #lista_bytes = np.array(comandos_a_serem_enviados)
+        print(comandos_a_serem_enviados)
+        n_comandos = len(comandos_a_serem_enviados).to_bytes(2, 'big')
+        # comandos_a_serem_enviados = ['F0', '0F', 'FF', '00', 'FF00', '00FF', '00', 'FF', '00', '00FF', '0F', '00FF', '00', 'F0', '00FF', '00FF']
+
+        # comandos_a_serem_enviados = " ".join(comandos_a_serem_enviados)
         lista_final=b''.join(comandos_a_serem_enviados)
-        
+        # txBuffer = bytearray.fromhex(comandos_a_serem_enviados)
+        # txBuffer =  b'\xff\x00\xff\xf0'
 
         print("Estabelencendo enlace:")
         com1 = enlace('COM3')
         print("Done")   
-        print("Ativando comunicação")
-        com1.enable()
-        print("Estabelecida")
-
+        
         #PEGANDO O TIMING
         tempo=time.time()
 
-        '''txBuffer = lista_bytes.tobytes()
-        messsage_len = len(txBuffer)
+        # Ativa comunicacao. Inicia os threads e a comunicação seiral 
+        print("Ativando comunicação")
+        com1.enable()
 
-        header_size = 2
-        txBuffer_header = messsage_len.to_bytes(header_size, byteorder='big')
-        print(f"tamanho da lista a ser enviada {messsage_len}")
+        #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
+        print("Estabelecida")
 
-        com1.sendData(txBuffer_header)
-        print("Header enviado")
+        # txBuffer = lista_bytes.tobytes()
+        txBuffer = lista_final
+        message_len = len(txBuffer)
+        # numero_comandos_enviados = len(comandos_a_serem_enviados).to_bytes(2,byteorder="big")
+        print()
+
+
+        header_size = 4
+        txBuffer_header = message_len.to_bytes(header_size, 'big')
+        print(f"tamanho da lista a ser enviada {message_len}")
+        print(f'txBuffer header: {txBuffer_header}')
+
+        print(f'numero de comandos a serem enviados: {n_comandos}')
+
+        com1.sendData(txBuffer_header + n_comandos + txBuffer)
+
+        # print(np.asarray(txBuffer_header))
+        # com1.sendData(np.asarray(txBuffer_header))
+        # print("Header enviado")
 
         # rxBufferResponse,nRxResponse = com1.getData(header_size)
 
@@ -74,48 +93,25 @@ def main():
             # print("Problema na conferencia")
 
         # print("Conferencia realizada")
-        #com1.sendData(np.asarray(txBuffer))
+
+        print(txBuffer)
+        # com1.sendData(np.asarray(txBuffer))
+        # com1.sendData(txBuffer)
         print("Mensagem enviada")
             
-        
-
-        rxBufferResponse, nRxAns = com1.getData(header_size)
-
-        ans = int.from_bytes(rxBufferResponse, 'big')
-
-        if ans == messsage_len:
-            print("transferencia realizada com sucesso")
-
-        else:
-            print("problema na transferencia")        
-'''
-
-        com1.sendData(b'\xaa\xaa')
-        print("testando ligação")
-        rxBuffer,nRx=com1.getData(2)
-        print("Recebido")
-        com1.rx.clearBuffer()
-
-        txBuffer=lista_final
-        txbufferlen=len(txBuffer)
-        com1.sendData(np.array(txBuffer))
-        print("Enviado informação")
-        print(txBuffer)
-
-
-        numero_comandos_enviados=len(comandos_a_serem_enviados).to_bytes(2,byteorder="big")
-        numero_comandos_recebidos, nRx= com1.getData(2)
-
-        if numero_comandos_enviados==numero_comandos_recebidos:
-            print("igual")
-        else:
-            print("diferente")
-
         ftempo=time.time()
-        tempo_total=ftempo-tempo
-        velocidade=tempo_total/txbufferlen
 
-        print("Tempo da tranferencia: {}".format(ftempo-tempo))
+        # rxBufferResponse, nRxAns = com1.getData(header_size)
+
+        # ans = int.from_bytes(rxBufferResponse, 'big')
+
+        # if ans == messsage_len:
+        #     print("transferencia realizada com sucesso")
+
+        # else:
+        #     print("problema na transferencia")        
+
+        print("Tempo de envio: {}".format(ftempo-tempo))
 
         # Encerra comunicação
         print("-------------------------")
@@ -132,3 +128,4 @@ def main():
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
     main()
+
