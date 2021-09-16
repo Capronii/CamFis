@@ -1,5 +1,5 @@
 # CamFis
-Repositório dos projetos de Camada Fisica
+Repositório dos Projetos de Camada Fisica
 
-Guilherme Caproni de Faria
+Guilherme Caproni de Faria\
 Francisco Augusto Buzolin Vasconcelos
