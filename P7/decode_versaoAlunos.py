@@ -34,6 +34,8 @@ NUMBER_FREQ_TABLE = {
     9 : (1477, 852)    
 }
 
+HIGH_FREQ_LIST = [1209, 1336, 1477]
+LOW_FREQ_LIST = [697, 770, 852, 941]
 
 def main():
  
@@ -97,47 +99,72 @@ def main():
     #voce deve tambem evitar que dois picos proximos sejam identificados, pois pequenas variacoes na
     #frequencia do sinal podem gerar mais de um pico, e na verdade tempos apenas 1.
    
-    index = pk.peak.indexes(yf, thres=0.3, min_dist=50,)
+    index = pk.peak.indexes(yf, thres=0.1, min_dist=50,)
 
-    # if len(index) > 2:
-        # print("mais que duas frequencias encontradas")
-        # return
 
     #printe os picos encontrados! 
     print(index)
 
-    freqs = []
-    h = []
-    for i in index:
-        foo = int(round(xf[i]))
-        h.append(int(yf[i]))
-        freqs.append(foo)
-        print(f"Frequencias de pico: {foo}, {round(yf[i])}")
+    freqs = [round(xf[i]) for i in index]
+    print(freqs)
+    # freqs = []
+    # h = []
+    # for i in index:
+    #     foo = int(round(xf[i]))
+    #     h.append(int(yf[i]))
+    #     freqs.append(foo)
+    #     print(f"Frequencias de pico: {foo}, {round(yf[i])}")
+
+    no_high = True
+    no_low = True
+    highs = []
+    lows = []
+    for i in freqs:
+        if i in HIGH_FREQ_LIST:
+            no_high = False
+            highs.append(i)
+
+        if i in LOW_FREQ_LIST:
+            no_low = False
+            lows.append(i)
     
+    if no_high == True or no_low == True:
+        print("no high freq or no low freq")
+        return
 
-    largest = max(h)
-    largest_index = h.index(largest)
-    print(h)
-    h_copy = h.copy()
-    h_copy.remove(largest)
-    print(h_copy)
-    second = max(h_copy)
-    second_index = h.index(second)
 
-    two_freq = [freqs[largest_index], freqs[second_index]]
+    # largest = max(h)
+    # largest_index = h.index(largest)
+    # print(h)
+    # h_copy = h.copy()
+    # h_copy.remove(largest)
+    # print(h_copy)
+    # second = max(h_copy)
+    # second_index = h.index(second)
 
-    #encontre na tabela duas frequencias proximas às frequencias de pico encontradas e descubra qual foi a tecla
+    # two_freq = [freqs[largest_index], freqs[second_index]]
     tecla = 0
 
     for key in NUMBER_FREQ_TABLE:
-        if two_freq[0] in NUMBER_FREQ_TABLE[key] and two_freq[1] in NUMBER_FREQ_TABLE[key]:
-            tecla = key
-            break
+        if any(item in highs for item in NUMBER_FREQ_TABLE[key]):
+            if any(item in lows for item in NUMBER_FREQ_TABLE[key]):
+                tecla = key
+                break
+
+
+        
+    #encontre na tabela duas frequencias proximas às frequencias de pico encontradas e descubra qual foi a tecla
+
+    # for key in NUMBER_FREQ_TABLE:
+    #     if highs in NUMBER_FREQ_TABLE[key] and lows in NUMBER_FREQ_TABLE[key]:
+    #         tecla = key
+    #         break
 
     #print a tecla.
     print(f"A tecla pressionada foi: {tecla}")
   
     ## Exibe gráficos
+    plt.show()
     
 
 if __name__ == "__main__":
